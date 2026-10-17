@@ -14,8 +14,11 @@ const PALETTE = Object.entries(COLOR_SWATCHES).map(([name, hex]) => ({
   rgb: [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)),
 }));
 
-/** Picks the most common palette color in the middle of the photo (where the garment usually is). */
-function guessColor(ctx, w, h) {
+/**
+ * Picks the palette colors that cover a meaningful share of the middle of the
+ * photo (where the garment usually is): the main color plus up to two accents.
+ */
+function guessColors(ctx, w, h) {
   const x0 = Math.floor(w * 0.3);
   const y0 = Math.floor(h * 0.3);
   const cw = Math.max(1, Math.floor(w * 0.4));
@@ -32,7 +35,9 @@ function guessColor(ctx, w, h) {
     }
     votes.set(best.name, (votes.get(best.name) || 0) + 1);
   }
-  return [...votes.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || '';
+  const ranked = [...votes.entries()].sort((a, b) => b[1] - a[1]);
+  const total = ranked.reduce((n, [, v]) => n + v, 0) || 1;
+  return ranked.filter(([, v], i) => i === 0 || v / total >= 0.18).slice(0, 3).map(([name]) => name);
 }
 
 /**
@@ -50,10 +55,10 @@ export async function compressImage(file, maxDim = 640, quality = 0.72) {
     canvas.width = w;
     canvas.height = h;
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    ctx.fillStyle = '#18181b'; // flatten transparent PNGs onto zinc
+    ctx.fillStyle = '#ffffff'; // flatten transparent PNGs onto white
     ctx.fillRect(0, 0, w, h);
     ctx.drawImage(img, 0, 0, w, h);
-    return { dataUrl: canvas.toDataURL('image/jpeg', quality), color: guessColor(ctx, w, h) };
+    return { dataUrl: canvas.toDataURL('image/jpeg', quality), colors: guessColors(ctx, w, h) };
   } finally {
     URL.revokeObjectURL(url);
   }

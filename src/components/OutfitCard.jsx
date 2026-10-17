@@ -1,5 +1,5 @@
 import { Bookmark, BookmarkCheck, Palette, Ruler, Thermometer, Trash2, WashingMachine } from 'lucide-react';
-import { CATEGORIES, swatchFor } from '../lib/constants.js';
+import { CATEGORIES, colorList, swatchFor } from '../lib/constants.js';
 import { Glass, Photo, Swatch, cx } from './ui.jsx';
 
 const order = (item) => (item ? CATEGORIES.indexOf(item.category) : 99);
@@ -26,7 +26,7 @@ export default function OutfitCard({ outfit, index, itemsById, saved, onToggleSa
             aria-label={saved ? 'Unsave look' : 'Save look'}
             className={cx(
               'btn !rounded-full !p-2.5',
-              saved ? 'bg-emerald-400 text-zinc-950' : 'border border-white/10 bg-white/[0.04] text-zinc-300',
+              saved ? 'bg-emerald-400 text-zinc-950' : 'border border-ink/10 bg-ink/[0.04] text-zinc-300',
             )}
           >
             {saved ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
@@ -36,11 +36,11 @@ export default function OutfitCard({ outfit, index, itemsById, saved, onToggleSa
 
       <div className="grid gap-2 px-4" style={{ gridTemplateColumns: `repeat(${Math.max(cols, 1)}, minmax(0, 1fr))` }}>
         {pieces.map(({ id, item }) => (
-          <div key={id} className="relative aspect-[3/4] overflow-hidden rounded-xl border border-white/10 bg-zinc-900">
+          <div key={id} className="relative aspect-[3/4] overflow-hidden rounded-xl border border-ink/10 bg-zinc-900">
             <Photo id={id} alt={item?.name} className="h-full w-full" />
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent p-2 pt-6">
-              <p className="truncate text-[11px] font-medium leading-tight text-zinc-100">{item?.name || 'Removed piece'}</p>
-              <p className="truncate text-[9.5px] uppercase tracking-wider text-zinc-400">{item?.category || '—'}</p>
+              <p className="truncate text-[11px] font-medium leading-tight text-white">{item?.name || 'Removed piece'}</p>
+              <p className="truncate text-[9.5px] uppercase tracking-wider text-white/70">{item?.category || '—'}</p>
             </div>
           </div>
         ))}
@@ -61,7 +61,7 @@ export default function OutfitCard({ outfit, index, itemsById, saved, onToggleSa
                 {pieces
                   .filter((p) => p.item)
                   .map((p) => (
-                    <Swatch key={p.id} color={swatchFor(p.item.color)} className="h-3 w-3" />
+                    <Swatch key={p.id} color={swatchFor(colorList(p.item)[0])} className="h-3 w-3" />
                   ))}
               </span>
               {outfit.colorStory}
@@ -70,7 +70,7 @@ export default function OutfitCard({ outfit, index, itemsById, saved, onToggleSa
         )}
         <p className="text-zinc-400">{outfit.rationale}</p>
         {outfit.weatherNote && (
-          <p className="flex items-start gap-2.5 rounded-xl border border-white/5 bg-white/[0.03] px-3 py-2 text-[12.5px] text-zinc-400">
+          <p className="flex items-start gap-2.5 rounded-xl border border-ink/5 bg-ink/[0.03] px-3 py-2 text-[12.5px] text-zinc-400">
             <Thermometer size={14} className="mt-0.5 shrink-0 text-emerald-300/80" />
             {outfit.weatherNote}
           </p>

@@ -11,7 +11,7 @@ export const TABS = [
 export default function BottomDock({ tab, onChange, badges = {} }) {
   return (
     <nav className="pointer-events-none fixed inset-x-0 bottom-0 z-40 px-4 pb-[calc(env(safe-area-inset-bottom)+10px)]">
-      <div className="glass pointer-events-auto mx-auto grid max-w-md grid-cols-4 gap-1 !rounded-[22px] !bg-zinc-900/75 p-1.5 shadow-2xl shadow-black/60">
+      <div className="glass pointer-events-auto mx-auto grid max-w-md grid-cols-4 gap-1 !rounded-[22px] !bg-white/85 p-1.5 shadow-2xl shadow-ink/15">
         {TABS.map(({ id, label, icon: Icon }) => {
           const active = tab === id;
           return (
@@ -22,7 +22,7 @@ export default function BottomDock({ tab, onChange, badges = {} }) {
               aria-current={active ? 'page' : undefined}
               className={cx(
                 'relative flex flex-col items-center gap-1 rounded-2xl py-2 transition active:scale-95',
-                active ? 'bg-white/[0.07] text-zinc-50' : 'text-zinc-500 hover:text-zinc-300',
+                active ? 'bg-ink/[0.07] text-zinc-50' : 'text-zinc-500 hover:text-zinc-300',
               )}
             >
               <span className="relative">

@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { Check, Trash2 } from 'lucide-react';
-import { STATUSES } from '../lib/constants.js';
+import { STATUSES, descriptor, normalizeItem } from '../lib/constants.js';
 import ItemFields from './ItemFields.jsx';
 import { Photo, Sheet, StatusDot, cx } from './ui.jsx';
 
 /** Detail / edit sheet for one item. Mount with key={item.id} so the draft resets per item. */
 export default function ItemSheet({ item, onClose, onSave, onDelete }) {
-  const [draft, setDraft] = useState(item);
+  const [draft, setDraft] = useState(() => normalizeItem(item));
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const save = () => {
-    onSave({ ...draft, name: draft.name.trim() || `${draft.color} ${draft.category}`.trim() });
+    onSave({ ...draft, name: draft.name.trim() || `${descriptor(draft)} ${draft.category}`.trim() });
     onClose();
   };
 
@@ -37,7 +37,7 @@ export default function ItemSheet({ item, onClose, onSave, onDelete }) {
       }
     >
       <div className="space-y-5">
-        <div className="overflow-hidden rounded-2xl border border-white/10">
+        <div className="overflow-hidden rounded-2xl border border-ink/10">
           <Photo id={item.id} alt={item.name} className="aspect-square w-full" />
         </div>
 
@@ -52,8 +52,8 @@ export default function ItemSheet({ item, onClose, onSave, onDelete }) {
                 className={cx(
                   'flex items-center gap-2.5 rounded-xl border px-3 py-3 text-left text-[13px] font-medium transition active:scale-[0.97]',
                   draft.status === s.id
-                    ? 'border-white/25 bg-white/[0.08] text-zinc-50'
-                    : 'border-white/10 bg-zinc-950/50 text-zinc-500',
+                    ? 'border-ink/25 bg-ink/[0.08] text-zinc-50'
+                    : 'border-ink/10 bg-zinc-950/50 text-zinc-500',
                 )}
               >
                 <StatusDot status={s.id} className={draft.status === s.id ? '' : 'opacity-50'} />

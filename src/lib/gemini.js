@@ -1,4 +1,4 @@
-import { CATEGORIES, FITS, GEMINI_MODEL } from './constants.js';
+import { CATEGORIES, FITS, GEMINI_MODEL, MAX_COLORS, colorList, designList } from './constants.js';
 import { describeWeather, itemWeatherTag, weatherRules } from './weather.js';
 import { uid } from './storage.js';
 
@@ -50,6 +50,7 @@ Principles:
 - Layering reads as streetwear when lengths are staggered — say when a hem should peek out, tuck, or front-tuck, and how to cuff or stack trousers.
 - Footwear anchors the silhouette: chunky soles under wide hems, sleeker shoes with tapered legs.
 - Accessories (caps, bags, chains, socks, eyewear) are finishing touches: 0–2 per look.
+- Items can have several colors and designs (graphics, logos, stripes, washes). A graphic or loud print is the focal point: pair it with calmer, solid pieces. Treat every listed color as part of the color story, not just the first. Washed or faded finishes read softer and vintage. Footwear and accessories have no fit; some pieces list none, so judge those by shape and name.
 - Respect the weather: layer for cold, breathe in heat. Read humidity and rain probability closely: when rain is likely, delicate footwear (suede, nubuck, canvas, mesh sneakers) stays home and robust footwear (waterproof boots such as Timberlands, leather shoes) plus a protective outer layer take over. Items tagged "⚠ rain-sensitive" must not be used on a wet day unless nothing else exists in that category; prefer items tagged "rain-ready".
 
 Hard rules:
@@ -96,7 +97,16 @@ export async function generateFitPack({ apiKey, items, weather, occasion, styleN
   const inventory = refs
     .map(
       ({ ref, item }) =>
-        `${ref} | ${item.category} | ${item.name} | color: ${item.color || 'unknown'} | fit: ${item.fit}${itemWeatherTag(item, weather)}`,
+        [
+          ref,
+          item.category,
+          item.name,
+          `color: ${colorList(item).join(' + ') || 'unknown'}`,
+          designList(item).length && `design: ${designList(item).join(', ')}`,
+          item.fit && `fit: ${item.fit}`,
+        ]
+          .filter(Boolean)
+          .join(' | ') + itemWeatherTag(item, weather),
     )
     .join('\n');
   const rules = weatherRules(weather);
@@ -108,7 +118,7 @@ export async function generateFitPack({ apiKey, items, weather, occasion, styleN
     packingMode ? 'Context: I am traveling — these are only the pieces in my suitcase.' : '',
     styleNotes?.trim() ? `My personal notes: ${styleNotes.trim()}` : '',
     '',
-    `Available wardrobe (${items.length} pieces; ref | category | name | color | fit):`,
+    `Available wardrobe (${items.length} pieces; ref | category | name | color | design | fit):`,
     inventory,
     '',
     'Build exactly 3 outfits as a fit pack.',
@@ -161,7 +171,11 @@ export async function analyzeItemPhoto(apiKey, dataUrl, signal) {
           parts: [
             { inlineData: { mimeType, data } },
             {
-              text: 'Catalog this single clothing item for a wardrobe app. Name: short and specific, like a product title (e.g. "Washed Black Boxy Tee", "Cream Wide-Leg Trousers"). Color: one or two plain words. Fit: how it is cut / drapes.',
+              text: `Catalog this single clothing item for a wardrobe app.
+- name: short and specific, like a product title (e.g. "Washed Black Boxy Tee", "Cream Wide-Leg Trousers").
+- colors: every distinct color you can actually see on the garment itself, main color first, then accents or secondary colors (max ${MAX_COLORS}). Ignore the background. Use plain names such as Black, Red, Grey, Cream, Navy. Do not list a color that is only a tiny detail.
+- designs: patterns, prints or finishes you can see, such as Graphic, Logo, Striped, Plaid, Washed, Faded, Distressed, Embroidered. Use an empty list if the piece is plain and solid. Never invent a design.
+- fit: how it is cut or drapes. Use "None" for footwear and accessories, and whenever the fit can't be judged from the photo.`,
             },
           ],
         },
@@ -173,10 +187,11 @@ export async function analyzeItemPhoto(apiKey, dataUrl, signal) {
           properties: {
             name: { type: 'STRING' },
             category: { type: 'STRING', enum: CATEGORIES },
-            color: { type: 'STRING' },
-            fit: { type: 'STRING', enum: FITS },
+            colors: { type: 'ARRAY', minItems: 1, maxItems: MAX_COLORS, items: { type: 'STRING' } },
+            designs: { type: 'ARRAY', maxItems: 4, items: { type: 'STRING' } },
+            fit: { type: 'STRING', enum: [...FITS, 'None'] },
           },
-          required: ['name', 'category', 'color', 'fit'],
+          required: ['name', 'category', 'colors', 'designs', 'fit'],
         },
         temperature: 0.2,
         thinkingConfig: { thinkingBudget: 0 },

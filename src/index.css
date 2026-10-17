@@ -5,8 +5,8 @@
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
-    background-color: #09090b;
-    color-scheme: dark;
+    background-color: #fafafa;
+    color-scheme: light;
   }
   body {
     @apply bg-zinc-950 font-sans text-zinc-100 antialiased;
@@ -37,10 +37,10 @@
 
 @layer components {
   .glass {
-    @apply rounded-2xl border border-white/10 bg-zinc-900/40 backdrop-blur-xl;
+    @apply rounded-2xl border border-ink/10 bg-white/70 shadow-sm shadow-ink/[0.04] backdrop-blur-xl;
   }
   .input {
-    @apply w-full rounded-xl border border-white/10 bg-zinc-950/60 px-3.5 py-2.5 text-zinc-100 outline-none transition placeholder:text-zinc-600 focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/15;
+    @apply w-full rounded-xl border border-ink/10 bg-white px-3.5 py-2.5 text-zinc-100 outline-none transition placeholder:text-zinc-600 focus:border-emerald-400/50 focus:ring-2 focus:ring-emerald-400/15;
   }
   .label {
     @apply text-[11px] font-medium uppercase tracking-[0.14em] text-zinc-500;
@@ -52,7 +52,7 @@
     @apply btn bg-emerald-400 text-zinc-950 shadow-lg shadow-emerald-500/20 hover:bg-emerald-300;
   }
   .btn-ghost {
-    @apply btn border border-white/10 bg-white/[0.04] text-zinc-200 hover:bg-white/[0.08];
+    @apply btn border border-ink/10 bg-ink/[0.04] text-zinc-200 hover:bg-ink/[0.08];
   }
   .btn-danger {
     @apply btn border border-rose-400/20 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20;

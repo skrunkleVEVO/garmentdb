@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 import { Camera, ImagePlus, Loader2, Save, Sparkles, X } from 'lucide-react';
 import { compressImage } from '../lib/image.js';
 import { analyzeItemPhoto } from '../lib/gemini.js';
+import { MAX_COLORS, fitOptions } from '../lib/constants.js';
 import { uid } from '../lib/storage.js';
 import ItemFields from './ItemFields.jsx';
 import { Glass, Sheet } from './ui.jsx';
@@ -25,8 +26,8 @@ export default function AddItemsModal({ open, onClose, onSave, apiKey, packingMo
     setReading((n) => n + files.length);
     for (const file of files) {
       try {
-        const { dataUrl, color } = await compressImage(file);
-        setStaged((s) => [...s, { tempId: uid(), photo: dataUrl, name: '', color, category: 'Top', fit: 'Oversized', tagged: false }]);
+        const { dataUrl, colors } = await compressImage(file);
+        setStaged((s) => [...s, { tempId: uid(), photo: dataUrl, name: '', colors, color: colors.join(', '), designs: [], category: 'Top', fit: '', tagged: false }]);
       } catch {
         setError(`Couldn't read ${file.name}. Try a JPEG or PNG.`);
       } finally {
@@ -55,7 +56,16 @@ export default function AddItemsModal({ open, onClose, onSave, apiKey, packingMo
         setStaged((s) =>
           s.map((x) =>
             x.tempId === t.tempId
-              ? { ...x, name: x.name || r.name, category: r.category, color: r.color || x.color, fit: r.fit, tagged: true }
+              ? {
+                  ...x,
+                  name: x.name || r.name,
+                  category: r.category,
+                  colors: r.colors?.length ? r.colors.slice(0, MAX_COLORS) : x.colors,
+                  color: (r.colors?.length ? r.colors.slice(0, MAX_COLORS) : x.colors).join(', '),
+                  designs: r.designs || [],
+                  fit: fitOptions(r.category)?.includes(r.fit) ? r.fit : '',
+                  tagged: true,
+                }
               : x,
           ),
         );
@@ -150,7 +160,7 @@ export default function AddItemsModal({ open, onClose, onSave, apiKey, packingMo
         {!staged.length && !reading && (
           <p className="px-2 text-center text-[13px] leading-relaxed text-zinc-500">
             Tip: lay each piece flat on a plain background. Photos are compressed to ~50 KB each so a full wardrobe fits on
-            your phone.{apiKey ? ' Gemini can auto-fill names, categories, colors and fits.' : ''}
+            your phone.{apiKey ? ' Gemini can auto-fill names, categories, colors, designs and fits.' : ''}
           </p>
         )}
 

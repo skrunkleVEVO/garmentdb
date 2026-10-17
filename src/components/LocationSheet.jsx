@@ -10,7 +10,7 @@ function Row({ loc, active, onPick }) {
       onClick={() => onPick(loc)}
       className={cx(
         'flex w-full items-center gap-3 rounded-xl border px-3.5 py-3 text-left transition active:scale-[0.99]',
-        active ? 'border-emerald-400/40 bg-emerald-400/10' : 'border-white/5 bg-white/[0.03] hover:bg-white/[0.06]',
+        active ? 'border-emerald-400/40 bg-emerald-400/10' : 'border-ink/5 bg-ink/[0.03] hover:bg-ink/[0.06]',
       )}
     >
       <MapPin size={16} className={active ? 'text-emerald-300' : 'text-zinc-500'} />

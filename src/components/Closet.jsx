@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Luggage, Plus, Search, Shirt } from 'lucide-react';
-import { CATEGORIES, STATUSES, STATUS_BY_ID, swatchFor } from '../lib/constants.js';
-import { Chip, EmptyState, Glass, Photo, StatusDot, Swatch, cx } from './ui.jsx';
+import { CATEGORIES, STATUSES, STATUS_BY_ID, colorList, descriptor } from '../lib/constants.js';
+import { Chip, EmptyState, Glass, Photo, StatusDot, Swatches, cx } from './ui.jsx';
 
 function ItemCard({ item, index, onOpen }) {
   const status = STATUS_BY_ID[item.status] || STATUS_BY_ID.active;
@@ -15,20 +15,22 @@ function ItemCard({ item, index, onOpen }) {
     >
       <div className="relative aspect-[4/5] overflow-hidden bg-zinc-900">
         <Photo id={item.id} alt={item.name} className={cx('h-full w-full transition', dimmed && 'opacity-50 grayscale-[40%]')} />
-        <span className="absolute left-2 top-2 flex items-center gap-1.5 rounded-full bg-black/55 px-2 py-1 text-[10.5px] font-medium text-zinc-200 backdrop-blur-md">
+        <span className="absolute left-2 top-2 flex items-center gap-1.5 rounded-full bg-white/85 px-2 py-1 text-[10.5px] font-medium text-zinc-200 shadow-sm backdrop-blur-md">
           <StatusDot status={item.status} />
           {status.short}
         </span>
-        <span className="absolute right-2 top-2 rounded-full bg-black/55 px-2 py-1 text-[9.5px] font-semibold uppercase tracking-wider text-zinc-300 backdrop-blur-md">
-          {item.fit}
-        </span>
+        {item.fit && (
+          <span className="absolute right-2 top-2 rounded-full bg-white/85 px-2 py-1 text-[9.5px] font-semibold uppercase tracking-wider text-zinc-300 shadow-sm backdrop-blur-md">
+            {item.fit}
+          </span>
+        )}
       </div>
       <div className="p-3">
         <p className="truncate text-[14px] font-medium tracking-tight">{item.name}</p>
         <p className="mt-1 flex items-center gap-1.5 text-[12px] text-zinc-500">
-          <Swatch color={swatchFor(item.color)} className="h-2.5 w-2.5" />
+          <Swatches colors={colorList(item)} className="h-2.5 w-2.5" />
           <span className="truncate">
-            {item.color || '—'} · {item.category}
+            {descriptor(item) || '—'} · {item.category}
           </span>
         </p>
       </div>
@@ -52,7 +54,7 @@ export default function Closet({ items, packingMode, onOpenItem, onAdd }) {
     return items
       .filter((it) => (packingMode ? it.status === 'packed' : status === 'all' || it.status === status))
       .filter((it) => category === 'All' || it.category === category)
-      .filter((it) => !q || `${it.name} ${it.color} ${it.fit} ${it.category}`.toLowerCase().includes(q))
+      .filter((it) => !q || `${it.name} ${descriptor(it)} ${it.fit || ''} ${it.category}`.toLowerCase().includes(q))
       .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   }, [items, packingMode, status, category, query]);
 
@@ -92,7 +94,7 @@ export default function Closet({ items, packingMode, onOpenItem, onAdd }) {
               onClick={() => setStatus(status === s.id ? 'all' : s.id)}
               className={cx(
                 'glass px-2.5 py-2.5 text-left transition active:scale-95',
-                status === s.id && '!border-white/25 !bg-white/[0.07]',
+                status === s.id && '!border-ink/25 !bg-ink/[0.07]',
               )}
             >
               <div className="flex items-center gap-1.5">

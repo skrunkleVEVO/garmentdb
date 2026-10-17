@@ -209,7 +209,7 @@ export default function Settings({ settings, setSettings, items, onExport, onImp
           </span>
           <span>~5 MB</span>
         </div>
-        <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
+        <div className="h-1.5 overflow-hidden rounded-full bg-ink/5">
           <div
             className={cx('h-full rounded-full transition-all', pct > 85 ? 'bg-rose-400' : 'bg-emerald-400')}
             style={{ width: `${pct}%` }}

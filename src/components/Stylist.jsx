@@ -22,7 +22,7 @@ import { Chip, Glass, cx } from './ui.jsx';
 
 function Metric({ icon: Icon, label, value, warn }) {
   return (
-    <div className={cx('rounded-xl border px-2.5 py-2', warn ? 'border-sky-400/30 bg-sky-400/10' : 'border-white/5 bg-white/[0.03]')}>
+    <div className={cx('rounded-xl border px-2.5 py-2', warn ? 'border-sky-400/30 bg-sky-400/10' : 'border-ink/5 bg-ink/[0.03]')}>
       <p className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-zinc-500">
         <Icon size={11} /> {label}
       </p>
@@ -244,7 +244,7 @@ export default function Stylist({
         </div>
         <div className="mt-3 grid grid-cols-4 gap-2 text-center">
           {CATEGORIES.map((c) => (
-            <div key={c} className="rounded-xl border border-white/5 bg-white/[0.03] py-2">
+            <div key={c} className="rounded-xl border border-ink/5 bg-ink/[0.03] py-2">
               <p className={cx('text-[16px] font-semibold tabular-nums', !catCounts[c] && 'text-zinc-600')}>{catCounts[c]}</p>
               <p className="text-[10px] uppercase tracking-wider text-zinc-500">{c}</p>
             </div>
@@ -314,7 +314,7 @@ export default function Stylist({
         <div className="space-y-4">
           {[0, 1, 2].map((i) => (
             <Glass key={i} className="relative h-64 overflow-hidden">
-              <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/[0.05] to-transparent" />
+              <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-ink/[0.05] to-transparent" />
             </Glass>
           ))}
         </div>

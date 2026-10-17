@@ -12,7 +12,7 @@ import { cx } from './components/ui.jsx';
 import { usePersistentState } from './hooks/usePersistentState.js';
 import { useWeather } from './hooks/useWeather.js';
 import { useCloudSync } from './hooks/useCloudSync.js';
-import { APP_NAME, COLOR_SWATCHES, DEFAULT_SETTINGS } from './lib/constants.js';
+import { APP_NAME, COLOR_SWATCHES, DEFAULT_SETTINGS, descriptor } from './lib/constants.js';
 import { headerLine, isWet } from './lib/weather.js';
 import { buildBackup, clearAll, deletePhoto, downloadJSON, putPhoto, restoreBackup, uid } from './lib/storage.js';
 
@@ -24,7 +24,7 @@ function PackingToggle({ on, onToggle, count }) {
       aria-pressed={on}
       className={cx(
         'flex items-center gap-2 rounded-full border py-1.5 pl-2.5 pr-1.5 text-[12.5px] font-medium transition active:scale-95',
-        on ? 'border-amber-400/30 bg-amber-400/10 text-amber-200' : 'border-white/10 bg-white/[0.04] text-zinc-400',
+        on ? 'border-amber-400/30 bg-amber-400/10 text-amber-200' : 'border-ink/10 bg-ink/[0.04] text-zinc-400',
       )}
     >
       <Luggage size={15} />
@@ -85,9 +85,11 @@ export default function App() {
       savedIds.push(s.tempId);
       created.push({
         id,
-        name: s.name.trim() || `${s.color} ${s.category}`.trim(),
+        name: s.name.trim() || `${descriptor(s)} ${s.category}`.trim(),
         category: s.category,
-        color: s.color.trim(),
+        colors: s.colors,
+        color: s.colors.join(', '),
+        designs: s.designs,
         fit: s.fit,
         status: settings.packingMode ? 'packed' : 'active',
         createdAt: Date.now(),
@@ -168,7 +170,7 @@ export default function App() {
         <div className="absolute -bottom-40 -right-20 h-72 w-72 rounded-full bg-teal-400/[0.05] blur-3xl" />
       </div>
 
-      <header className="sticky top-0 z-30 border-b border-white/5 bg-zinc-950/70 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
+      <header className="sticky top-0 z-30 border-b border-ink/5 bg-zinc-950/70 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
         <div className="mx-auto flex h-14 max-w-lg items-center justify-between gap-3 px-4">
           <div className="min-w-0">
             <p className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.22em] text-zinc-500">
@@ -288,7 +290,7 @@ export default function App() {
             key={toast.id}
             role="status"
             className={cx(
-              'glass flex animate-toast-in items-center gap-2 !rounded-full !bg-zinc-900/90 px-4 py-2 text-[13px] shadow-xl shadow-black/50',
+              'glass flex animate-toast-in items-center gap-2 !rounded-full !bg-zinc-900/90 px-4 py-2 text-[13px] shadow-xl shadow-ink/15',
               toast.isError ? 'text-rose-200' : 'text-zinc-100',
             )}
           >

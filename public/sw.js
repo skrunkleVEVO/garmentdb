@@ -1,6 +1,6 @@
 // GarmentDB service worker — offline app shell.
 // Bump CACHE when you want every installed copy to drop its old cache.
-const CACHE = 'garmentdb-v2';
+const CACHE = 'garmentdb-v3';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png'];
 
 self.addEventListener('install', (event) => {
