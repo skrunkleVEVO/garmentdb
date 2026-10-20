@@ -1,16 +1,52 @@
-import { CATEGORIES, FITS, GEMINI_MODEL, MAX_COLORS, colorList, designList } from './constants.js';
+import { CATEGORIES, FITS, GEMINI_MODEL, MAX_COLORS, OUTFIT_LIMITS, colorList, designList } from './constants.js';
 import { describeWeather, itemWeatherTag, weatherRules } from './weather.js';
 import { uid } from './storage.js';
 
 const BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
-async function callGemini(apiKey, body, signal) {
-  const res = await fetch(`${BASE}/${GEMINI_MODEL}:generateContent`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-    body: JSON.stringify(body),
-    signal,
+const RETRY_DELAYS = [800, 2000, 4500];
+const RETRYABLE = new Set([429, 500, 502, 503, 504]);
+
+const wait = (ms, signal) =>
+  new Promise((resolve, reject) => {
+    const t = setTimeout(resolve, ms);
+    signal?.addEventListener('abort', () => {
+      clearTimeout(t);
+      reject(new DOMException('Aborted', 'AbortError'));
+    });
   });
+
+/**
+ * fetch with retries. "Failed to fetch" is a network-level failure: a dropped
+ * mobile connection, or a Google error/overload response sent without CORS
+ * headers so the browser can't read it. Both usually clear up within seconds.
+ */
+async function geminiFetch(url, init, signal) {
+  for (let attempt = 0; ; attempt++) {
+    let res;
+    try {
+      res = await fetch(url, { ...init, signal });
+    } catch (e) {
+      if (e.name === 'AbortError') throw e;
+      if (attempt >= RETRY_DELAYS.length) throw new Error("Couldn't reach Gemini. Check your connection and try again.");
+      await wait(RETRY_DELAYS[attempt], signal);
+      continue;
+    }
+    if (!RETRYABLE.has(res.status) || attempt >= RETRY_DELAYS.length) return res;
+    await wait(RETRY_DELAYS[attempt], signal);
+  }
+}
+
+async function callGemini(apiKey, body, signal) {
+  const res = await geminiFetch(
+    `${BASE}/${GEMINI_MODEL}:generateContent`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+      body: JSON.stringify(body),
+    },
+    signal,
+  );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     const msg = data?.error?.message || `Gemini request failed (${res.status})`;
@@ -33,10 +69,13 @@ async function callGemini(apiKey, body, signal) {
 
 /** Cheap key check: fetches model metadata, costs no tokens. */
 export async function testApiKey(apiKey) {
-  const res = await fetch(`${BASE}/${GEMINI_MODEL}`, { headers: { 'x-goog-api-key': apiKey } });
+  const res = await geminiFetch(`${BASE}/${GEMINI_MODEL}`, { headers: { 'x-goog-api-key': apiKey } });
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new Error(data?.error?.message || `Key check failed (${res.status})`);
+    const msg = data?.error?.message || `Key check failed (${res.status})`;
+    // Brand-new keys can take a few minutes to activate on Google's side.
+    if (res.status === 400 || res.status === 403) throw new Error(`${msg} If you just created this key, give it a few minutes.`);
+    throw new Error(msg);
   }
   return true;
 }
@@ -50,12 +89,13 @@ Principles:
 - Layering reads as streetwear when lengths are staggered — say when a hem should peek out, tuck, or front-tuck, and how to cuff or stack trousers.
 - Footwear anchors the silhouette: chunky soles under wide hems, sleeker shoes with tapered legs.
 - Accessories (caps, bags, chains, socks, eyewear) are finishing touches: 0–2 per look.
+- Layers: Top is a base or mid layer (tee, hoodie, sweater, knit). Shirt is a button-up or overshirt, worn alone, open over a Top, or tucked. Jacket is a light layer (bomber, denim, track, varsity, coach jacket). Outerwear is a coat, parka or puffer for cold or wet days. Build upper bodies as real layers, inner to outer: e.g. tee → open shirt → jacket, or hoodie → coat. Never pile up pieces of the same kind.
 - Items can have several colors and designs (graphics, logos, stripes, washes). A graphic or loud print is the focal point: pair it with calmer, solid pieces. Treat every listed color as part of the color story, not just the first. Washed or faded finishes read softer and vintage. Footwear and accessories have no fit; some pieces list none, so judge those by shape and name.
 - Respect the weather: layer for cold, breathe in heat. Read humidity and rain probability closely: when rain is likely, delicate footwear (suede, nubuck, canvas, mesh sneakers) stays home and robust footwear (waterproof boots such as Timberlands, leather shoes) plus a protective outer layer take over. Items tagged "⚠ rain-sensitive" must not be used on a wet day unless nothing else exists in that category; prefer items tagged "rain-ready".
 
 Hard rules:
 - Use only the item refs given. Never invent pieces.
-- Each outfit: at least 1 Top (2–3 if layering), exactly 1 Bottom, exactly 1 Footwear, 0–2 Accessories, 6 pieces max. If a category is missing from the wardrobe, build the best look possible and say what's missing.
+- Each outfit: 1–3 upper layers using at most one piece each of Top, Shirt, Jacket and Outerwear (at least one Top or Shirt as the base), exactly 1 Bottom, exactly 1 Footwear, 0–2 Accessories, 7 pieces max. Only wear a Jacket and Outerwear together when it's genuinely cold. Never use two Tops, e.g. never two hoodies. If a category is missing from the wardrobe, build the best look possible and say what's missing.
 - The 3 outfits must differ clearly in silhouette and color story; do not repeat the same hero piece in all three.
 - Rationale: 2–3 tight, concrete sentences that name the actual pieces. No filler.`;
 
@@ -84,6 +124,17 @@ function fitPackSchema(refs) {
     },
     required: ['outfits'],
   };
+}
+
+/** Drops pieces past OUTFIT_LIMITS (first picks win), so the rules hold even if the model slips. */
+function enforceLimits(itemIds, items) {
+  const byId = Object.fromEntries(items.map((i) => [i.id, i]));
+  const used = {};
+  return itemIds.filter((id) => {
+    const cat = byId[id]?.category;
+    used[cat] = (used[cat] || 0) + 1;
+    return used[cat] <= (OUTFIT_LIMITS[cat] ?? 1);
+  });
 }
 
 /**
@@ -150,7 +201,7 @@ export async function generateFitPack({ apiKey, items, weather, occasion, styleN
       colorStory: o.colorStory || '',
       rationale: o.rationale || '',
       weatherNote: o.weatherNote || '',
-      itemIds: [...new Set((o.itemRefs || []).map((r) => byRef[r]).filter(Boolean))],
+      itemIds: enforceLimits([...new Set((o.itemRefs || []).map((r) => byRef[r]).filter(Boolean))], items),
     }))
     .filter((o) => o.itemIds.length > 0);
 
@@ -175,6 +226,7 @@ export async function analyzeItemPhoto(apiKey, dataUrl, signal) {
 - name: short and specific, like a product title (e.g. "Washed Black Boxy Tee", "Cream Wide-Leg Trousers").
 - colors: every distinct color you can actually see on the garment itself, main color first, then accents or secondary colors (max ${MAX_COLORS}). Ignore the background. Use plain names such as Black, Red, Grey, Cream, Navy. Do not list a color that is only a tiny detail.
 - designs: patterns, prints or finishes you can see, such as Graphic, Logo, Striped, Plaid, Washed, Faded, Distressed, Embroidered. Use an empty list if the piece is plain and solid. Never invent a design.
+- category: Top for tees, hoodies, sweaters and knits; Shirt for button-ups and overshirts; Jacket for light jackets (bomber, denim, track, varsity); Outerwear for coats, parkas and puffers.
 - fit: how it is cut or drapes. Use "None" for footwear and accessories, and whenever the fit can't be judged from the photo.`,
             },
           ],

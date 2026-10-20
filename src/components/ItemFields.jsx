@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { CATEGORIES, COLOR_SWATCHES, DESIGNS, MAX_COLORS, fitOptions, swatchFor } from '../lib/constants.js';
-import { Segmented, Swatch, cx } from './ui.jsx';
+import { Swatch, cx } from './ui.jsx';
 
 const same = (a, b) => a.toLowerCase() === b.toLowerCase();
 
@@ -122,7 +122,13 @@ export default function ItemFields({ value, onChange }) {
 
       <div>
         <p className="label mb-1.5">Category</p>
-        <Segmented options={CATEGORIES} value={value.category} onChange={setCategory} />
+        <div className="flex flex-wrap gap-1.5">
+          {CATEGORIES.map((c) => (
+            <Pill key={c} active={value.category === c} onClick={() => setCategory(c)}>
+              {c}
+            </Pill>
+          ))}
+        </div>
       </div>
 
       <TagPicker

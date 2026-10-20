@@ -202,7 +202,8 @@ export default function Stylist({
     () => Object.fromEntries(CATEGORIES.map((c) => [c, pool.filter((i) => i.category === c).length])),
     [pool],
   );
-  const missing = ['Top', 'Bottom', 'Footwear'].filter((c) => !catCounts[c]);
+  const hasBase = catCounts.Top || catCounts.Shirt;
+  const missing = [!hasBase && 'Top', ...['Bottom', 'Footwear'].filter((c) => !catCounts[c])].filter(Boolean);
   const itemsById = useMemo(() => Object.fromEntries(items.map((i) => [i.id, i])), [items]);
 
   useEffect(() => () => abortRef.current?.abort(), []);
@@ -258,7 +259,7 @@ export default function Stylist({
           {CATEGORIES.map((c) => (
             <div key={c} className="rounded-xl border border-ink/5 bg-ink/[0.03] py-2">
               <p className={cx('text-[16px] font-semibold tabular-nums', !catCounts[c] && 'text-zinc-600')}>{catCounts[c]}</p>
-              <p className="text-[10px] uppercase tracking-wider text-zinc-500">{c}</p>
+              <p className="truncate px-0.5 text-[10px] uppercase tracking-wider text-zinc-500">{c}</p>
             </div>
           ))}
         </div>

@@ -121,7 +121,7 @@ export default function Closet({ items, packingMode, onOpenItem, onAdd }) {
       <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">
         {['All', ...CATEGORIES].map((c) => (
           <Chip key={c} active={category === c} onClick={() => setCategory(c)}>
-            {{ Top: 'Tops', Bottom: 'Bottoms', Accessory: 'Accessories' }[c] || c}
+            {{ Top: 'Tops', Shirt: 'Shirts', Jacket: 'Jackets', Bottom: 'Bottoms', Accessory: 'Accessories' }[c] || c}
           </Chip>
         ))}
       </div>

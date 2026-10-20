@@ -3,11 +3,19 @@ import { DEFAULT_LOCATION } from './weather.js';
 export const APP_NAME = 'GarmentDB';
 export const GEMINI_MODEL = 'gemini-3.8-flash';
 
-export const CATEGORIES = ['Top', 'Bottom', 'Footwear', 'Accessory'];
+// Tops are base/mid layers (tees, hoodies, sweaters). Shirts are button-ups and
+// overshirts. Jackets are light layers, Outerwear is coats and puffers.
+export const CATEGORIES = ['Top', 'Shirt', 'Jacket', 'Outerwear', 'Bottom', 'Footwear', 'Accessory'];
+
+/** Most pieces of each category one outfit may use, so a fit never stacks three hoodies. */
+export const OUTFIT_LIMITS = { Top: 1, Shirt: 1, Jacket: 1, Outerwear: 1, Bottom: 1, Footwear: 1, Accessory: 2 };
 // Fit only makes sense for some garments. Footwear and accessories have none,
 // and for tops/bottoms it can be left on "None" too (stored as '').
 export const FITS_BY_CATEGORY = {
   Top: ['Oversized', 'Boxy', 'Cropped', 'Regular', 'Slim'],
+  Shirt: ['Oversized', 'Boxy', 'Cropped', 'Regular', 'Slim'],
+  Jacket: ['Oversized', 'Boxy', 'Cropped', 'Regular', 'Slim'],
+  Outerwear: ['Oversized', 'Longline', 'Boxy', 'Cropped', 'Regular'],
   Bottom: ['Baggy', 'Wide', 'Straight', 'Tapered', 'Regular', 'Slim'],
 };
 export const FITS = [...new Set(Object.values(FITS_BY_CATEGORY).flat())];

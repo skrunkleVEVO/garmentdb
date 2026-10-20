@@ -115,7 +115,7 @@ export default function App() {
 
   const markWorn = (itemIds) => {
     const washable = (i) =>
-      itemIds.includes(i.id) && (i.category === 'Top' || i.category === 'Bottom') && i.status !== 'retired';
+      itemIds.includes(i.id) && ['Top', 'Shirt', 'Bottom'].includes(i.category) && i.status !== 'retired';
     const moved = items.filter(washable).length;
     setItems((prev) => prev.map((i) => (washable(i) ? { ...i, status: 'laundry', updatedAt: Date.now() } : i)));
     notify(moved ? `Sent ${moved} to the laundry` : 'Nothing to wash');
