@@ -12,7 +12,7 @@ import { cx } from './components/ui.jsx';
 import { usePersistentState } from './hooks/usePersistentState.js';
 import { useWeather } from './hooks/useWeather.js';
 import { useCloudSync } from './hooks/useCloudSync.js';
-import { APP_NAME, COLOR_SWATCHES, DEFAULT_SETTINGS, descriptor } from './lib/constants.js';
+import { APP_NAME, DEFAULT_SETTINGS, descriptor } from './lib/constants.js';
 import { headerLine, isWet } from './lib/weather.js';
 import { buildBackup, clearAll, deletePhoto, downloadJSON, putPhoto, restoreBackup, uid } from './lib/storage.js';
 
@@ -277,12 +277,6 @@ export default function App() {
           if (weather?.manual) setWeather(null); // picking a city switches back to live weather
         }}
       />
-
-      <datalist id="dc-colors">
-        {Object.keys(COLOR_SWATCHES).map((c) => (
-          <option key={c} value={c} />
-        ))}
-      </datalist>
 
       {toast && (
         <div className="pointer-events-none fixed inset-x-0 top-[calc(env(safe-area-inset-top)+96px)] z-[60] flex justify-center px-4">

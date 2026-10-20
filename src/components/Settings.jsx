@@ -80,7 +80,7 @@ function CloudSection({ cloud }) {
       )}
       <p className="mt-3 text-[12px] leading-relaxed text-zinc-500">
         Your pieces, photos, statuses, saved looks and preferences sync to your own Firestore space. The app keeps working
-        offline and catches up when you're back online. Your Gemini key never leaves this device.
+        offline and catches up when you're back online. Your Gemini key syncs too, so it's waiting on every device you sign in on.
       </p>
     </Section>
   );
@@ -96,6 +96,12 @@ export default function Settings({ settings, setSettings, items, onExport, onImp
   const importRef = useRef(null);
 
   useEffect(() => onInstallAvailability(setCanInstall), []);
+
+  // A key synced in from another device shows up here without a reload.
+  useEffect(() => {
+    setKeyDraft((d) => (d.trim() === settings.apiKey ? d : settings.apiKey));
+    setKeyState((k) => (k === 'empty' && settings.apiKey ? 'saved' : k));
+  }, [settings.apiKey]);
 
   const used = storageBytes();
   const pct = Math.min(100, (used / STORAGE_BUDGET) * 100);
@@ -156,7 +162,13 @@ export default function Settings({ settings, setSettings, items, onExport, onImp
             autoCapitalize="off"
             spellCheck={false}
             value={keyDraft}
-            onChange={(e) => setKeyDraft(e.target.value)}
+            onChange={(e) => {
+              setKeyDraft(e.target.value);
+              const key = e.target.value.trim();
+              setSettings((s) => ({ ...s, apiKey: key }));
+              setKeyState(key ? 'saved' : 'empty');
+              setKeyError('');
+            }}
           />
           <button
             type="button"
@@ -177,7 +189,7 @@ export default function Settings({ settings, setSettings, items, onExport, onImp
           </button>
         </div>
         <p className="mt-3 text-[12px] leading-relaxed text-zinc-500">
-          Stored only in this browser's local storage and sent only to Google's Gemini API. It's never included in backups.
+          Saved on this device as you type and, when you're signed in, synced to your private cloud space. Sent only to Google's Gemini API and never included in backups.
         </p>
       </Section>
 

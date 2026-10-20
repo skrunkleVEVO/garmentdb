@@ -194,7 +194,7 @@ export async function analyzeItemPhoto(apiKey, dataUrl, signal) {
           required: ['name', 'category', 'colors', 'designs', 'fit'],
         },
         temperature: 0.2,
-        thinkingConfig: { thinkingBudget: 0 },
+        thinkingConfig: { thinkingLevel: 'low' },
       },
     },
     signal,

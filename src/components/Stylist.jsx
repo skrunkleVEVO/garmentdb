@@ -95,7 +95,23 @@ function WeatherCard({ weather, setWeather, unit, location, loading, error, onRe
       </div>
 
       {editing ? (
-        <div className="mt-3 grid grid-cols-[96px_1fr_auto] gap-2">
+        <div className="mt-3 space-y-2">
+          <div className="no-scrollbar flex gap-1.5 overflow-x-auto pb-0.5">
+            {MANUAL_CONDITIONS.map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setManualCond(c)}
+                className={cx(
+                  'shrink-0 rounded-full border px-3 py-1.5 text-[13px] font-medium transition active:scale-95',
+                  manualCond === c ? 'border-zinc-100 bg-zinc-100 text-zinc-950' : 'border-ink/10 bg-ink/[0.03] text-zinc-400',
+                )}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+          <div className="grid grid-cols-[1fr_auto] gap-2">
           <input
             className="input"
             type="number"
@@ -104,14 +120,10 @@ function WeatherCard({ weather, setWeather, unit, location, loading, error, onRe
             value={manualTemp}
             onChange={(e) => setManualTemp(e.target.value)}
           />
-          <select className="input" value={manualCond} onChange={(e) => setManualCond(e.target.value)}>
-            {MANUAL_CONDITIONS.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-          </select>
           <button type="button" className="btn-primary" onClick={saveManual}>
             Set
           </button>
+          </div>
         </div>
       ) : weather ? (
         <>

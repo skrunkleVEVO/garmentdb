@@ -2,8 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { isCloudConfigured } from '../firebase.config.js';
 import { cachePhoto, deletePhoto, getPhoto, load, save } from '../lib/storage.js';
 
-// Settings that follow you across devices. The Gemini key stays per-device.
-const SYNCED_SETTINGS = ['unit', 'styleNotes', 'location', 'packingMode'];
+// Settings that follow you across devices, including the Gemini key, so it
+// survives reinstalls and the separate storage of an installed home-screen app.
+// Firestore rules keep users/{uid} readable only by its owner.
+const SYNCED_SETTINGS = ['apiKey', 'unit', 'styleNotes', 'location', 'packingMode'];
 
 /** JSON with sorted keys, so Firestore's field order doesn't look like a change. */
 function stable(v) {

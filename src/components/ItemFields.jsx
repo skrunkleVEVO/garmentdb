@@ -25,10 +25,12 @@ function Pill({ active, onClick, children, className }) {
  * Multi-select tag editor. Chosen tags show first (tap to remove), then a row of
  * presets to add, then a free-text field for anything else ("sage", "Y2K flames").
  */
-function TagPicker({ label, hint, presets, value, onChange, max, swatches, placeholder, listId }) {
+function TagPicker({ label, hint, presets, value, onChange, max, swatches, placeholder }) {
   const [draft, setDraft] = useState('');
   const full = max != null && value.length >= max;
-  const remaining = presets.filter((p) => !value.some((v) => same(v, p)));
+  // Typing filters the preset pills instead of opening the browser's native suggestion list.
+  const query = draft.trim().toLowerCase();
+  const remaining = presets.filter((p) => !value.some((v) => same(v, p)) && p.toLowerCase().includes(query));
 
   const add = (tag) => {
     const t = tag.trim();
@@ -62,7 +64,7 @@ function TagPicker({ label, hint, presets, value, onChange, max, swatches, place
       {remaining.length > 0 && !full && (
         <div className="no-scrollbar mt-2 flex gap-1.5 overflow-x-auto pb-0.5">
           {remaining.map((p) => (
-            <Pill key={p} onClick={() => add(p)}>
+            <Pill key={p} onClick={() => { add(p); setDraft(''); }}>
               {swatches && <Swatch color={COLOR_SWATCHES[p]} className="h-3 w-3" />}
               {p}
             </Pill>
@@ -76,7 +78,7 @@ function TagPicker({ label, hint, presets, value, onChange, max, swatches, place
           placeholder={full ? `Max ${max}. Remove one to add more` : placeholder}
           value={draft}
           disabled={full}
-          list={listId}
+          autoComplete="off"
           autoCapitalize="words"
           enterKeyHint="done"
           onChange={(e) => setDraft(e.target.value)}
@@ -132,7 +134,6 @@ export default function ItemFields({ value, onChange }) {
         max={MAX_COLORS}
         swatches
         placeholder="Add a color, e.g. Sage"
-        listId="dc-colors"
       />
 
       <TagPicker

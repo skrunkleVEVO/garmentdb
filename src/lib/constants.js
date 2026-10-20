@@ -1,7 +1,7 @@
 import { DEFAULT_LOCATION } from './weather.js';
 
 export const APP_NAME = 'GarmentDB';
-export const GEMINI_MODEL = 'gemini-2.5-flash';
+export const GEMINI_MODEL = 'gemini-3.8-flash';
 
 export const CATEGORIES = ['Top', 'Bottom', 'Footwear', 'Accessory'];
 // Fit only makes sense for some garments. Footwear and accessories have none,
@@ -22,7 +22,9 @@ export function fitOptions(category, current = '') {
 // Patterns, prints and finishes that sit on top of the base colors.
 export const DESIGNS = [
   'Graphic', 'Logo', 'Striped', 'Plaid', 'Floral', 'Camo', 'Tie-dye', 'Washed', 'Faded', 'Distressed',
-  'Embroidered', 'Textured', 'Print',
+  'Embroidered', 'Textured', 'Print', 'Colorblock', 'Checkered', 'Houndstooth', 'Polka Dot',
+  'Paisley', 'Pinstripe', 'Ribbed', 'Quilted', 'Corduroy', 'Denim', 'Knit', 'Leather', 'Suede', 'Mesh',
+  'Fleece', 'Nylon', 'Reflective', 'Patchwork', 'Raw Hem', 'Acid Wash', 'Varsity',
 ];
 
 export const STATUSES = [
@@ -68,6 +70,25 @@ export const COLOR_SWATCHES = {
   Burgundy: '#6b1f2b',
   Orange: '#e07a2b',
   Yellow: '#e6c63b',
+  Ivory: '#f6f1e3',
+  Stone: '#c2b8a3',
+  Taupe: '#8b7d6b',
+  Camel: '#c19a6b',
+  Rust: '#a5482a',
+  Mustard: '#d4a72c',
+  Forest: '#25432f',
+  Mint: '#a8dcc0',
+  Teal: '#1f7a7a',
+  'Sky Blue': '#7ab8e8',
+  Cobalt: '#1f4fb8',
+  Plum: '#5c2a4f',
+  Maroon: '#5a1a1f',
+  'Hot Pink': '#e0457b',
+  Coral: '#ef7f6a',
+  Peach: '#f2b896',
+  Lilac: '#c8a2c8',
+  Silver: '#c0c0c4',
+  Gold: '#c9a227',
 };
 
 export const MAX_COLORS = 4;
